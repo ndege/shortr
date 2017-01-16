@@ -1,0 +1,9 @@
+language: go
+script:
+  - cd $GOPATH/src/github.com/ndege/shortr
+  # - go get -d -v && go build -v && go test -i ./... && go test -test.v ./...
+notifications:
+  email: false
+branches:
+  only:
+    - master
