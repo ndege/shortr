@@ -1,11 +1,14 @@
 {
-	"mysql_host": "localhost",
-	"mysql_database": "",
-	"mysql_user": "",
-	"mysql_password": "",
+	"DbHost": "localhost",
+	"DbName": "",
+	"DbUsername": "",
+	"DbPassword": "",
+	"DbPort": "3306",
 
-	"short_url": "http://short.ext",
-	"default_url": "http://long-domain-name.ext",
+	"UrlService": "http://short.ext",
+	"UrlFallback": "http://long-domain-name.ext",
 
-	"server_port": "8080"
+	"ApplicationPort": "8080",
+
+		"MaximalRequest": 10
 }

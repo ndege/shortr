@@ -16,8 +16,8 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 
 GOPATH="/home/morgner/go"
 
-GUS="$GOPATH/bin/shortr-api"
-GUS_NAME="shortr-api"
+GUS="$GOPATH/bin/shortr"
+GUS_NAME="shortr"
 GUS_PID="/var/run/$GUS_NAME.pid"
 GUS_LOG_DIR="/var/log/$GUS_NAME" ; mkdir -p $GUS_LOG_DIR
 GUS_LOG_FILE="$GUS_LOG_DIR/$GUS_NAME.log"
