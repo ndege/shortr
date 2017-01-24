@@ -100,7 +100,7 @@ func GenerateController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = stmt.Exec(slug, url, 0)
+	_, err = stmt.Exec(slug, url, 0, ip)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
