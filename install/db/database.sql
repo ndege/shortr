@@ -12,4 +12,4 @@ CREATE TABLE `shortr` (
 	PRIMARY KEY (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Used for the URL shortener';
 
-INSERT INTO `shortr` VALUES ('test', 'http://ulan-bator.org', NOW(), 1);
+INSERT INTO `shortr` VALUES ('test', 'http://domain.tld', NOW(), 1, '127.0.0.1');
