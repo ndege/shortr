@@ -29,7 +29,7 @@ func main() {
 
 	// Instantiate the mux router
 	r := mux.NewRouter()
-	r.HandleFunc("/s", GenerateController).Queries("url", "")
+	r.HandleFunc("/shortr", GenerateController).Methods("POST")
 	r.HandleFunc("/{slug:[a-z0-9]+}", RedirectController)
 	r.HandleFunc("/", IndexController)
 

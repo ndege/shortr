@@ -2,16 +2,23 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+	"encoding/json"
 	"errors"
   "net/http"
 	"net/url"
   "math/rand"
 	"strings"
+	"log"
 )
 
 type Error struct {
     Msg      string    `json:"msg"`
     Status 	 string    `json:"status"`
+}
+
+type Request struct {
+		Url			 string 	`json:"url"`
+	  Format	 string   `json:"wq"`
 }
 
 type Shorten struct {
@@ -25,34 +32,32 @@ type Shorten struct {
 // Writes the short URL in plain text to w.
 func GenerateController(w http.ResponseWriter, r *http.Request) {
 
-  // Get back as json format
-  output := r.URL.Query().Get("output")
-  json := false
-  if output == "json" {
-    json = true;
+	// Get json POST request
+	decoder := json.NewDecoder(r.Body)
+	var param Request
+  err := decoder.Decode(&param)
+  if err != nil {
+      jResp(w, Error{Msg: err.Error(), Status: "400"})
+			return
   }
+	log.Println(param.Url)
 
 	// Check if the url parameter has been sent along (and is not empty)
-	url := r.URL.Query().Get("url")
-  if url == "" {
-		http.Error(w, "", http.StatusBadRequest)
+	if param.Url == "" {
+		jResp(w, Error{Msg: "No parameter 'url' is set. Parameter is mandatory", Status: "400"})
 		return
 	}
 
 	// Validate url
-	err := validateUrlScheme(url)
-	if err != nil {
-		if (json) {
-			jResp(w, Error{Msg: err.Error(), Status: "400"})
-		} else {
-			http.Error(w, "", http.StatusBadRequest)
-		}
+	err = validateUrlScheme(param.Url)
+	if err  != nil {
+		jResp(w, Error{Msg: err.Error(), Status: "400"})
 		return
 	}
 
 	// Get the short URL out of the config
 	if cfg.UrlService == "" {
-		http.Error(w, "", http.StatusInternalServerError)
+		jResp(w, Error{Msg: "No base url: UrlService is set for service at configuration", Status: "400"})
 		return
 	}
 	short_url := cfg.UrlService
@@ -60,25 +65,17 @@ func GenerateController(w http.ResponseWriter, r *http.Request) {
 	// Get ip address
 	ip := httpRemoteIP(r)
 	if throttleCheck(ip) == false {
-		if (json) {
-				jResp(w, Error{Msg: "Limit achived of shorten ulr's in defined interval", Status: "400"} )
-		} else {
-			  http.Error(w, "", http.StatusBadRequest)
-		}
+		jResp(w, Error{Msg: "Limit achived of shorten ulr's in defined interval", Status: "400"})
 		return
 	}
 
 	// Check if url already exists in the database
 	var slug string
-	err = db.QueryRow("SELECT `slug` FROM `shortr` WHERE `url` = ?", url).Scan(&slug)
+	err = db.QueryRow("SELECT `slug` FROM `shortr` WHERE `url` = ?", param.Url).Scan(&slug)
 	if err == nil {
 		// The URL already exists! Return the shortened URL.
-    if json {
-        jResp(w, Shorten{Url: short_url + "/" + slug, Status: "200"} )
-    } else {
-		    w.Write([]byte(short_url + "/" + slug))
-    }
-    return
+    jResp(w, Shorten{Url: short_url + "/" + slug, Status: "201"})
+		return
 	}
 
 	// generate a slug and validate it doesn't
@@ -88,7 +85,7 @@ func GenerateController(w http.ResponseWriter, r *http.Request) {
 		slug = generateSlug()
 		err, exists = slugExists(slug)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			jResp(w, Error{Msg: err.Error(), Status: "400"})
 			return
 		}
 	}
@@ -96,22 +93,18 @@ func GenerateController(w http.ResponseWriter, r *http.Request) {
 	// Insert it into the database
 	stmt, err := db.Prepare("INSERT INTO `shortr` (`slug`, `url`, `date`, `hits`, `ip`) VALUES (?, ?, NOW(), ?, ?)")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		jResp(w, Error{Msg: err.Error(), Status: "400"})
 		return
 	}
-
-	_, err = stmt.Exec(slug, url, 0, ip)
+	_, err = stmt.Exec(slug, param.Url, 0, ip)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		jResp(w, Error{Msg: err.Error(), Status: "400"})
 		return
 	}
+	// Return response
+  jResp(w, Shorten{Url: short_url + "/" + slug, Status: "201"})
+	return
 
-  if json {
-      jResp(w, Shorten{Url: short_url + "/" + slug, Status: "200"})
-  } else {
-	   w.WriteHeader(http.StatusCreated)
-	   w.Write([]byte(short_url + "/" + slug))
-  }
 }
 
 // generateSlug will generate a random slug to be used as shorten link.
