@@ -23,6 +23,7 @@ type Config struct {
 	UrlFallback  string   `json:"FallbackUrl`
   AppPort      string   `json:"ApplicationPort"`
 	MaxRequest   int      `json:"MaximalRequest"`
+	SigningKey   string   `json:"JwtSigningKey"`
 }
 
 // The configuration information for the app we're administering

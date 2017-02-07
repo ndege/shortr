@@ -5,6 +5,8 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"github.com/auth0/go-jwt-middleware"
+	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"log"
@@ -29,9 +31,10 @@ func main() {
 
 	// Instantiate the mux router
 	r := mux.NewRouter()
-	r.HandleFunc("/shortr", GenerateController).Methods("POST")
-	r.HandleFunc("/{slug:[a-z0-9]+}", RedirectController)
-	r.HandleFunc("/", IndexController)
+	r.Handle("/auth", AuthController).Methods("POST")
+	r.Handle("/shortr",  jwtMiddleware.Handler(GenerateController)).Methods("POST")
+	r.Handle("/{slug:[a-z0-9]+}", RedirectController)
+	r.Handle("/", IndexController)
 
 	// Assign mux as the HTTP handler
 	http.Handle("/", r)
@@ -55,3 +58,10 @@ func jResp(w http.ResponseWriter, data interface{}) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(string(payload)))
 }
+
+var jwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
+	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+		return mySigningKey, nil
+	},
+	SigningMethod: jwt.SigningMethodHS256,
+})

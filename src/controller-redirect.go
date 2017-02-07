@@ -8,7 +8,7 @@ import (
 
 // Handles a requested short URL.
 // Redirects with a 301 header if found.
-func RedirectController(w http.ResponseWriter, r *http.Request) {
+var RedirectController = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	// 1. Check if a slug exists
 	vars := mux.Vars(r)
 	slug, ok := vars["slug"]
@@ -40,4 +40,4 @@ func RedirectController(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Finally, redirect the user to the URL
 	http.Redirect(w, r, url, http.StatusMovedPermanently)
-}
+})

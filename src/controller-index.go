@@ -6,7 +6,7 @@ import (
 
 // Catches all other requests to the short URL domain.
 // If a default URL exists in the config redirect to it.
-func IndexController(w http.ResponseWriter, r *http.Request) {
+var IndexController = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	// 1. Get the redirect URL out of the config
 	if cfg.UrlFallback == "" {
@@ -20,4 +20,4 @@ func IndexController(w http.ResponseWriter, r *http.Request) {
 
 	// 2. If it exists, redirect the user to it
 	http.Redirect(w, r, cfg.UrlFallback, http.StatusMovedPermanently)
-}
+})

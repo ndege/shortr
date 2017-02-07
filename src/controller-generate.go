@@ -16,7 +16,7 @@ type Error struct {
     Status 	 string    `json:"status"`
 }
 
-type Request struct {
+type ShortrRequest struct {
 		Url			 string 	`json:"url"`
 	  Format	 string   `json:"wq"`
 }
@@ -30,11 +30,15 @@ type Shorten struct {
 // Shortens a given URL passed through in the request.
 // If the URL has already been shortened, returns the existing URL.
 // Writes the short URL in plain text to w.
+<<<<<<< HEAD
 func GenerateController(w http.ResponseWriter, r *http.Request) {
+=======
+var GenerateController = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+>>>>>>> 79a90de... add basic jwt authentification of api. add jwt create token at controller and jwt middleware to auth shortr post request
 
 	// Get json POST request
 	decoder := json.NewDecoder(r.Body)
-	var param Request
+	var param ShortrRequest
   err := decoder.Decode(&param)
   if err != nil {
       jResp(w, Error{Msg: err.Error(), Status: "400"})
@@ -105,7 +109,11 @@ func GenerateController(w http.ResponseWriter, r *http.Request) {
   jResp(w, Shorten{Url: short_url + "/" + slug, Status: "201"})
 	return
 
+<<<<<<< HEAD
 }
+=======
+})
+>>>>>>> 79a90de... add basic jwt authentification of api. add jwt create token at controller and jwt middleware to auth shortr post request
 
 // generateSlug will generate a random slug to be used as shorten link.
 func generateSlug() string {

@@ -1,19 +1,37 @@
 # An URL shortener written in Golang
-Inspired by Sam Wierema' [Go URL Shortener](https://github.com/samwierema/go-url-shortener), it's still continued way to learn Golang by building an URL shortener in Go.
+Shortr is inspired by Sam Wierema' [Go URL Shortener](https://github.com/samwierema/go-url-shortener), and more a project to get familiar with Golang.
 
 ## Features
 
-* Redirect to your main website when no slug, or incorrect slug, is entered, e.g. `http://ubl.li/` → `http://dev.ubl.li/`.
-* Generates short URLs using only `[a-z0-9]` characters.
-* Doesn’t create multiple short URLs when you try to shorten the same URL. In this case, the script will simply return the existing short URL for that long URL.
-* Add some validation and sacurity checks to ameliorate live performance of apllication.
-** Limit creation of short urls in time interval
-** Check if there's a valid url host
-** Avoid self reference on base url
+Scope of the application is to shorten urls using only `[a-z0-9]` characters and
+redirect requests to the corresponding site. In addtion the application has a
+tiny api interface to auhenticate and create short urls with a jwt token. Use
+case is the idea of a user based url shortener api due to common laws of countries
+to be responsible for content of provided services.
+
+In addition, ther are several features implemented as:
+* Redirect to your main website when no slug, or incorrect slug, is entered, e.g. `http://domain.tdl/` → `http://website.domain.tdl/`.
+* Doesn’t create a short URLs again if there's an attempt to shorten same URL. Therefor script returns already existing short URL.
+* Additionally validation and security checks as: (1) Avoid flooding. Limit creation of short urls in a defined time interval. (2) Check if url host is valid. (3) Avoiding self reference on base url.
+
+### API Requests
+
+All requests json-encoded and returns as response a json.
+
+| Requests   | Variables                                 | Type   | Response  															| Token
+|------------|-------------------------------------------|--------|-----------------------------------------| ------
+| /auth      | {'username':{user},'password':{password}} | POST   | {'url':{shortr_url},'status':{2xx}}     |
+| /shortr    | {'url':{url_to_shorten}}                  | POST   | {'token':{bearer_token},'status':{2xx}} | X
+
+Please note error response will return {'error':{error_msg},'status':{4xx}}
+
+_Examples:_
+curl -X POST "domain.tdl/auth" -H "Content-Type: application/json" -d "{\"user\":\"test\",\"password\":\"pass\"}"
+curl -X POST "domain.tdl/shortr" -H "Content-Type: application/json" -H "Authorization: bearer {token}" -d "{\"url\":\"domain_to_shorten.tdl\"}"
 
 ## Installation
 1. Download the source code and install it using the `go install` command.
-2. Use `database.sql` to create the `shortr` table in a database of choice.
+2. Use `database.sql` in `install/db` to create tables.
 3. Create a config file in `/path/to/shortr/` named `env.json`. Use `env-example.json` as a example.
 4. Run the program as a daemon using one of the many methods: write a script for [upstart](https://launchpad.net/upstart), init, use [daemonize](http://software.clapper.org/daemonize/), [Supervisord](http://supervisord.org/), [Circus](http://circus.readthedocs.org/) or just plain old `nohup`. You can even start (and manage) it in a `screen` session.
 5. Adding the following configuration to Apache (make sure you've got [mod_proxy](http://httpd.apache.org/docs/2.2/mod/mod_proxy.html) enabled):
@@ -29,10 +47,3 @@ Inspired by Sam Wierema' [Go URL Shortener](https://github.com/samwierema/go-url
 
 ### Using the example init script
 You will find an example init script in the `scripts` folder. To use, you **must** at least change the GOPATH line to point to your Go root path.
-
-## To-do
-* Add tests
-
-## Authors
-* [Frank Morgner](http://github.com/ndege)
-* [Sam Wierema](http://wiere.ma)
