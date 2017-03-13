@@ -13,6 +13,9 @@ import (
 	"net/http"
 )
 
+// Version of application.
+const Version = "0.0.02"
+
 var db  *sql.DB
 
 func main() {
