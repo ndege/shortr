@@ -10,5 +10,7 @@
 
 	"ApplicationPort": "8080",
 
-		"MaximalRequest": 10
+	"MaximalRequest": 10,
+
+	"JwtSigningKey": ""
 }
