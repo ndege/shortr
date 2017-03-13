@@ -5,25 +5,42 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"flag"
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
-	"log"
-	"net/http"
 )
 
 // Version of application.
-const Version = "0.0.02"
+const Version = "0.0.03"
 
 var db  *sql.DB
 
 func main() {
 
-	// Read config file
-	ReadInConfig("./env.json")
+	cfgfile := flag.String("config", "env.json", "mandatory json config file")
+	serve := flag.Bool("serve", false, "serve file")
+	version := flag.Bool("version", false, "show version and exit")
 
-    // Instantiate the database
+	flag.Parse()
+
+	if *version {
+		log.Println(Version)
+		os.Exit(0)
+	}
+
+	if *cfgfile == "" {
+		log.Println("Config file to run service is mandatory. See env-example.json.")
+		os.Exit(0)
+	}
+	ReadInConfig(*cfgfile)
+
+  // Instantiate the database
 	var err error
 	dsn := cfg.DbUser + ":" + cfg.DbPass + "@tcp(" + cfg.DbHost + ":3306)/" + cfg.DbName + "?collation=utf8mb4_unicode_ci&parseTime=true"
 	db, err = sql.Open("mysql", dsn)
@@ -32,20 +49,22 @@ func main() {
 	}
 	defer db.Close()
 
-	// Instantiate the mux router
-	r := mux.NewRouter()
-	r.Handle("/auth", AuthController).Methods("POST")
-	r.Handle("/shortr",  jwtMiddleware.Handler(GenerateController)).Methods("POST")
-	r.Handle("/{slug:[a-z0-9]+}", RedirectController)
-	r.Handle("/", IndexController)
+	if *serve {
+		// Instantiate the mux router
+		r := mux.NewRouter()
+		r.Handle("/auth", AuthController).Methods("POST")
+		r.Handle("/shortr",  jwtMiddleware.Handler(GenerateController)).Methods("POST")
+		r.Handle("/{slug:[a-z0-9]+}", RedirectController)
+		r.Handle("/", IndexController)
 
-	// Assign mux as the HTTP handler
-	http.Handle("/", r)
-	// Start HTTP Server
-	log.Println("Start application v" + Version + " at port " + cfg.AppPort)
-	err = http.ListenAndServe(":"+cfg.AppPort, nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		// Assign mux as the HTTP handler
+		http.Handle("/", r)
+		// Start HTTP Server
+		log.Println("Start application v" + Version + " at port " + cfg.AppPort)
+		err = http.ListenAndServe(":"+cfg.AppPort, nil)
+		if err != nil {
+			log.Fatal("ListenAndServe: ", err)
+		}
 	}
 }
 
