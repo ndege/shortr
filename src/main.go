@@ -53,7 +53,7 @@ func main() {
 		// Instantiate the mux router
 		r := mux.NewRouter()
 		r.Handle("/auth", AuthController).Methods("POST")
-		r.Handle("/shortr",  jwtMiddleware.Handler(GenerateController)).Methods("POST")
+		r.Handle("/shortr", jwtMiddleware.Handler(GenerateController)).Methods("POST")
 		r.Handle("/{slug:[a-z0-9]+}", RedirectController)
 		r.Handle("/", IndexController)
 

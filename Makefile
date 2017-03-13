@@ -1,14 +1,13 @@
 SHELL = /bin/bash
 
-all: $(TARGETS)
-	go build
+TARGETS = shortr
 
-install:
-	go install
+all: $(TARGETS)
 
 clean:
 	go clean
+	rm -f $(TARGETS)
 
-shortr: src/*.go
+$(TARGETS): src/*.go
 	go get -v ./...
-	go build -o shortr src/*.go
+	go build -o $@ src/*.go
