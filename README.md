@@ -1,4 +1,4 @@
-# An URL shortener written in Golang
+# Shortr - an Golang URL shortener
 Shortr is inspired by Sam Wierema' [Go URL Shortener](https://github.com/samwierema/go-url-shortener), and more a project to get familiar with Golang.
 
 ## Features
@@ -20,7 +20,7 @@ All requests json-encoded and returns as response a json.
 
 | Requests   | Variables                                 | Type   | Response  															| Token
 |------------|-------------------------------------------|--------|-----------------------------------------| ------
-| /auth      | {'username':{user},'password':{password}} | POST   | {'url':{shortr_url},'status':{2xx}}     |
+| /auth      | {'username':{user},'password':{password}} | POST   | {'url':{shortr_url},'status':{2xx}}     | -
 | /shortr    | {'url':{url_to_shorten}}                  | POST   | {'token':{bearer_token},'status':{2xx}} | X
 
 Please note error response will return {'error':{error_msg},'status':{4xx}}
@@ -30,11 +30,10 @@ curl -X POST "domain.tdl/auth" -H "Content-Type: application/json" -d "{\"user\"
 curl -X POST "domain.tdl/shortr" -H "Content-Type: application/json" -H "Authorization: bearer {token}" -d "{\"url\":\"domain_to_shorten.tdl\"}"
 
 ## Installation
-1. Download the source code and install it using the `go install` command.
-2. Use `database.sql` in `install/db` to create tables.
+1. Download the source code and install it using the `make shortr` command.
+2. Use separately `database.sql` in `install/db` to create tables.
 3. Create a config file in `/path/to/shortr/` named `env.json`. Use `env-example.json` as a example.
-4. Run the program as a daemon using one of the many methods: write a script for [upstart](https://launchpad.net/upstart), init, use [daemonize](http://software.clapper.org/daemonize/), [Supervisord](http://supervisord.org/), [Circus](http://circus.readthedocs.org/) or just plain old `nohup`. You can even start (and manage) it in a `screen` session.
-5. Adding the following configuration to Apache (make sure you've got [mod_proxy](http://httpd.apache.org/docs/2.2/mod/mod_proxy.html) enabled):
+4. Adding the following configuration to Apache (make sure you've got [mod_proxy](http://httpd.apache.org/docs/2.2/mod/mod_proxy.html) enabled):
 ```
 <VirtualHost *:80>
 	ServerName your-short-domain.ext
@@ -45,5 +44,8 @@ curl -X POST "domain.tdl/shortr" -H "Content-Type: application/json" -H "Authori
 </VirtualHost>
 ```
 
-### Using the example init script
-You will find an example init script in the `scripts` folder. To use, you **must** at least change the GOPATH line to point to your Go root path.
+### Using the run.sh script
+Generally you can run the program by `go run src/*.go` or `./shortr` using parameters with defined flags at main.go. But for purposes of convenience `run.sh` is maybe a better choice.   
+
+* Run the program by using `./run.sh`. Write output to a log file use parameter `-l` for indicate a path and see it at `.shortr.log`.
+* Stop the program by using `./run.sh stop`.
