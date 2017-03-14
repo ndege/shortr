@@ -17,7 +17,7 @@ import (
 )
 
 // Version of application.
-const Version = "0.0.03"
+const Version = "0.1.0"
 
 var db  *sql.DB
 
